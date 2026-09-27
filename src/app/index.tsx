@@ -1,98 +1,170 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { CurrentWeather } from '@/components/current-weather';
+import { Footer } from '@/components/footer';
+import { Forecast } from '@/components/forecast';
+import { SearchBar } from '@/components/search-bar';
+import { SkyBackground, WeatherBadge } from '@/components/sky-background';
+import { StatusMessage } from '@/components/status-message';
+import { Colors, Fonts, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { LoadingState, useWeather } from '@/hooks/use-weather';
+import type { TemperatureUnit } from '@/utils/format';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+const LOADING_MESSAGES: Partial<Record<LoadingState, string>> = {
+  city: 'Finding the latest weather...',
+  location: 'Finding your location...',
+};
+
+export default function WeatherScreen() {
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [unit, setUnit] = useState<TemperatureUnit>('celsius');
+  const {
+    weather,
+    forecast,
+    loadingState,
+    error,
+    isForecastLoading,
+    forecastError,
+    searchByCity,
+    searchByCurrentLocation,
+    refresh,
+  } = useWeather();
+
+  // Pull-to-refresh keeps the current results on screen, so it has no loading message.
+  const loadingMessage = LOADING_MESSAGES[loadingState];
+  const isSearching = loadingMessage !== undefined;
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.screen}>
+      <SkyBackground />
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          // Lets buttons respond on the first tap while the keyboard is open.
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          // iOS: scrolls the focused input above the keyboard.
+          automaticallyAdjustKeyboardInsets
+          refreshControl={
+            weather ? (
+              <RefreshControl
+                refreshing={loadingState === 'refresh'}
+                onRefresh={refresh}
+                tintColor={Colors.accent}
+                colors={[Colors.accent]}
+              />
+            ) : undefined
+          }>
+          <View style={styles.card}>
+            <WeatherBadge />
+            <Text style={styles.eyebrow}>Your daily outlook</Text>
+            <Text style={styles.title} accessibilityRole="header">
+              Weather Forecast
+            </Text>
+            <Text style={styles.intro}>
+              Search any city, or use your location, to see current conditions and the forecast.
+            </Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+            <SearchBar
+              city={city}
+              country={country}
+              onCityChange={setCity}
+              onCountryChange={setCountry}
+              onSearch={() => searchByCity(city, country)}
+              onUseLocation={searchByCurrentLocation}
+              loadingState={loadingState}
+            />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+            <View style={styles.results}>
+              {isSearching && <StatusMessage variant="loading" message={loadingMessage} />}
 
-        {Platform.OS === 'web' && <WebBadge />}
+              {!isSearching && error !== '' && <StatusMessage variant="error" message={error} />}
+
+              {!isSearching && error === '' && !weather && (
+                <StatusMessage message="Search for a city or use your location to view the weather." />
+              )}
+
+              {!isSearching && weather && (
+                <>
+                  <CurrentWeather weather={weather} unit={unit} onUnitChange={setUnit} />
+                  <Forecast
+                    forecast={forecast}
+                    timezone={weather.timezone}
+                    unit={unit}
+                    isLoading={isForecastLoading}
+                    error={forecastError}
+                  />
+                </>
+              )}
+            </View>
+          </View>
+
+          <Footer />
+        </ScrollView>
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: Colors.sky,
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+  },
+  scrollContent: {
+    width: '100%',
     maxWidth: MaxContentWidth,
+    alignSelf: 'center',
+    gap: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.four,
+    paddingBottom: Spacing.five,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
+  card: {
     paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    paddingVertical: Spacing.five,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: Radius.large,
+    shadowColor: '#1a5278',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 6,
   },
-  title: {
+  eyebrow: {
+    marginBottom: Spacing.two,
+    color: Colors.accentLight,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.5,
     textAlign: 'center',
-  },
-  code: {
     textTransform: 'uppercase',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  title: {
+    color: Colors.heading,
+    fontFamily: Fonts.serif,
+    fontSize: 34,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  intro: {
+    marginTop: Spacing.three,
+    marginBottom: Spacing.four,
+    color: Colors.textMuted,
+    fontSize: 15,
+    lineHeight: 23,
+    textAlign: 'center',
+  },
+  results: {
+    marginTop: Spacing.five,
   },
 });

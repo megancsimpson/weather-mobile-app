@@ -1,65 +1,46 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import '@/global.css';
-
 import { Platform } from 'react-native';
 
+// Colours carried over from the web version of the app.
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+  sky: '#a8dbf2',
+  skyDeep: '#4a9cd0',
+  sun: '#ffe58b',
+  card: 'rgba(255, 255, 255, 0.9)',
+  panel: '#edf7fb',
+  panelBorder: '#c8e2ef',
+  inputBorder: '#b9d4e5',
+  heading: '#12314a',
+  text: '#173d59',
+  textMuted: '#527083',
+  textSubtle: '#628093',
+  placeholder: '#829cac',
+  accent: '#167dbc',
+  accentLight: '#287db3',
+  accentPressed: '#0d669e',
+  toggleBorder: '#9fc9df',
+  error: '#a24d40',
+  errorBackground: '#fff2ef',
+  errorBorder: '#e8beb5',
+  footer: 'rgba(16, 93, 143, 0.55)',
+  footerText: '#eaf8ff',
+  white: '#ffffff',
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+export const Fonts = {
+  serif: Platform.select({ ios: 'Georgia', default: 'serif' }),
+};
 
 export const Spacing = {
-  half: 2,
   one: 4,
   two: 8,
   three: 16,
   four: 24,
   five: 32,
-  six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const Radius = {
+  small: 6,
+  large: 12,
+} as const;
+
+export const MaxContentWidth = 600;

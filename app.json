@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "weather-mobile-app",
+    "name": "Weather Forecast",
     "slug": "weather-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "weathermobileapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon"
     },
@@ -25,6 +25,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show the weather where you are."
+        }
+      ],
       [
         "expo-splash-screen",
         {
