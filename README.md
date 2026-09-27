@@ -35,6 +35,7 @@ This is the mobile version of my [Weather Forecast web app](https://github.com/m
 - OpenWeatherMap API (Current Weather and 5 Day / 3 Hour Forecast)
 - ESLint (`eslint-config-expo`)
 - Jest (`jest-expo`) and React Native Testing Library
+- Built with the help of [Claude Code](https://claude.com/claude-code) (see [AI assistance](#ai-assistance))
 
 ## Getting Started
 
@@ -167,6 +168,10 @@ The 49 tests use Jest and React Native Testing Library. They use a fake `fetch` 
 - **Keyboard covering inputs:** on a phone, the keyboard can hide the fields and buttons. The page scrolls with the keyboard, taps work while it is open, and dragging the page closes it.
 - **Country aliases:** writing the tests showed that `UK` was being sent as-is instead of as the ISO code `GB`, because the "any two letters" check ran before the names list. (OpenWeatherMap happens to accept `UK`, so searches still worked.) The names list is now checked first.
 - **Different error cases:** location adds new ways to fail (permission denied, location services off, no GPS signal), and each one gets its own message explaining what to do.
+
+### AI assistance
+
+This app was built with the help of [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant. I provided my original web app and the assignment requirements. Claude Code helped convert the components to React Native, add the geolocation feature, write the automated tests, and draft this README. I tested the app on my own phone and reviewed the code before submitting.
 
 ### API key security
 
